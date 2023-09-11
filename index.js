@@ -68,11 +68,10 @@ app.route('/api/users/:_id/exercises')
   const user = await User.findOne({_id: req.params._id})
   user.exercises.push(exercise)
   res.json({
-    "username": user.username,
-    "count" : 2,
     "_id": user._id,
-    "date" : exercise.date,
-    "duration": exercise.duration,
+    "username": user.username,
+    "date" : Date(exercise.date).toDateString(),
+    "duration": Number(exercise.duration),
     "description": exercise.description
   })
 })
@@ -86,7 +85,7 @@ app.route('/api/users/:_id/logs')
     "_id" : user._id,
     "log": user.exercises.map(exercise => {
       exercise.description,
-      exercise.duration,
+      Number(exercise.duration),
       exercise.date
     })
   })
