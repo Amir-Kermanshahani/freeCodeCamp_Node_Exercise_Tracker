@@ -82,6 +82,7 @@ app.route('/api/users/:_id/logs')
   const user = await User.findOne({_id: req.params._id})
   res.json({
     "username": user.username,
+    "count" : user.exercises.length(),
     "_id" : user._id,
     "log": user.exercises.map(exercise => {
       exercise.description,
