@@ -71,7 +71,9 @@ app.route('/api/users/:_id/exercises')
     "username": user.username,
     "count" : 2,
     "_id": user._id,
-    "log" : [user.exercises]
+    "date" : exercise.date,
+    "duration": exercise.duration,
+    "description": exercise.description
   })
 })
 
