@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 const exerciseSchema = new Schema({
   description: {type: String, required: true},
   duration: {type: Number, required: true},
-  date: Date,
+  date: String,
 })
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 const usersSchema = new Schema({
