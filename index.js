@@ -63,7 +63,7 @@ app.route('/api/users/:_id/exercises')
   const exercise ={
     duration: req.body.duration,
     description : req.body.description,
-    date: req.body.date ? new Date(req.body.date) : new Date()
+    date: req.body.date ? new Date(req.body.date).toDateString() : new Date().toDateString()
   }
   const user = await User.findOne({_id: req.params._id})
   user.exercises.push(exercise)
@@ -71,7 +71,7 @@ app.route('/api/users/:_id/exercises')
   res.json({
     "_id": user._id,
     "username": user.username,
-    "date" : exercise.date.toDateString(),
+    "date" : exercise.date,
     "duration": Number(exercise.duration),
     "description": exercise.description
   })
