@@ -83,6 +83,10 @@ app.route('/api/users/:_id/logs')
     if (req.params.from) {from = new Date(req.paramas.from)}
     if (req.params.to) {to = new Date(req.paramas.to)}
     if (req.params.limit) {limit = req.params.limit}
+    if (from || to || limit) {
+      const exercises = User.exercises.find({"exercise.date": {$gt: from}, "exercise.date": {$ls: to}}).limit(limit)
+      res.log = exercises
+    }
     const user = await User.findById({_id: req.params._id})
     res.json({
       "_id": user._id,
