@@ -71,7 +71,7 @@ app.route('/api/users/:_id/exercises')
   res.json({
     "_id": user._id,
     "username": user.username,
-    "date" : new Date(exercise.date).toUTCString(),
+    "date" : new Date(exercise.date).toISOString(),
     "duration": Number(exercise.duration),
     "description": exercise.description
   })
