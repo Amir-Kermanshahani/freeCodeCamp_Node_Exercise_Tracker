@@ -17,8 +17,8 @@ app.get('/', (req, res) => {
 // MongoDB Database Cinfiguration
 
 const exerciseSchema = new Schema({
-  description: String,
-  duration: Number,
+  description: {type: String, required: true},
+  duration: {type: Number, required: true},
   date: Date,
 })
 const Exercise = mongoose.model('Exercise', exerciseSchema);
@@ -60,13 +60,14 @@ app.route('/api/users')
 
 app.route('/api/users/:_id/exercises')
 .post(async function(req, res) {
-  const exercise = {
+  const exercise ={
     duration: req.body.duration,
     description : req.body.description,
     date: req.body.date
   }
   const user = await User.findOne({_id: req.params._id})
   user.exercises.push(exercise)
+  user.save()
   res.json({
     "_id": user._id,
     "username": user.username,
@@ -79,17 +80,13 @@ app.route('/api/users/:_id/exercises')
 
 app.route('/api/users/:_id/logs')
 .get(async function(req, res) {
-  const user = await User.findOne({_id: req.params._id})
-  res.json({
-    "username": user.username,
-    "count" : user.exercises.length(),
-    "_id" : user._id,
-    "log": user.exercises.map(exercise => {
-      exercise.description,
-      Number(exercise.duration),
-      exercise.date
+    const user = await User.findById({_id: req.params._id})
+    res.json({
+      "_id": user._id,
+      "username": user.username,
+      "count": user.exercises.length,
+      "log": user.exercises
     })
-  })
 })
 
 const listener = app.listen(process.env.PORT || 3000, () => {
