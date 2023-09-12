@@ -77,24 +77,47 @@ app.route('/api/users/:_id/exercises')
   })
 })
 
+app.get('/api/users/:_id/logs', async function (req, res) {
+	const userId = req.params._id;
+	const from = req.query.from || new Date(0).toISOString().substring(0, 10);
+	const to =
+		req.query.to || new Date(Date.now()).toISOString().substring(0, 10);
+	const limit = Number(req.query.limit) || 0;
 
-app.route('/api/users/:_id/logs')
-.get(async function(req, res) {
-    if (req.params.from) {from = new Date(req.paramas.from)}
-    if (req.params.to) {to = new Date(req.paramas.to)}
-    if (req.params.limit) {limit = req.params.limit}
-    if (from || to || limit) {
-      const exercises = User.exercises.find({"exercise.date": {$gt: from}, "exercise.date": {$ls: to}}).limit(limit)
-      res.log = exercises
-    }
-    const user = await User.findById({_id: req.params._id})
-    res.json({
-      "_id": user._id,
-      "username": user.username,
-      "count": user.exercises.length,
-      "log": user.exercises
-    })
-})
+	console.log('### get the log from a user ###'.toLocaleUpperCase());
+
+	//? Find the user
+	let user = await User.findById(userId).exec();
+
+	console.log(
+		'looking for exercises with id ['.toLocaleUpperCase() + userId + '] ...'
+	);
+
+	//? Find the exercises
+	let exercises = await Exercise.find({
+		userId: userId,
+		date: { $gte: from, $lte: to },
+	})
+		.select('description duration date')
+		.limit(limit)
+		.exec();
+
+	let parsedDatesLog = exercises.map((exercise) => {
+		return {
+			description: exercise.description,
+			duration: exercise.duration,
+			date: new Date(exercise.date).toDateString(),
+		};
+	});
+
+	res.json({
+		_id: user._id,
+		username: user.username,
+		count: parsedDatesLog.length,
+		log: parsedDatesLog,
+	});
+});
+
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
