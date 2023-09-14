@@ -63,7 +63,7 @@ app.route('/api/users/:_id/exercises')
   const userId = req.params._id
   const _exercise = {
     "description" : req.body.description,
-    "duration" : req.body.duration,
+    "duration" : Number(req.body.duration),
     "date" : req.body.date !== "" ? new Date(req.body.date).toDateString() : new Date().toDateString()
   }
   const collectionName = "users";
@@ -86,6 +86,7 @@ app.route('/api/users/:_id/exercises')
 
 app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
+  const params = req.query
   const userId = req.params._id
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -96,11 +97,17 @@ app.route('/api/users/:_id/logs')
           username: 1,
           _id: 1,
           count: { $cond: { if: { $isArray: "$log" }, then: { $size: "$log" }, else: "NA"} },
-          log: 1
+          log: {
+            $filter: {
+              input: "$date",
+              as: "date",
+              cond: {
+                $and: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
+              }
        }
-    }
-    
-  ] )
+    }}
+  }
+  ])
   for await (const doc of user) {
     res.json({
       "username": doc.username,
