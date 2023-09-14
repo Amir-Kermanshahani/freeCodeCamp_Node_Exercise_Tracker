@@ -121,55 +121,52 @@ app.route('/api/users/:_id/exercises')
 //   }
 // })
 
+
 app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
+  const params = req.query
+  if(!params.to) {params.to = new Date()}
+  if(!params.from) {params.from = new Date(0)}
+  if (!params.limit) {params.limit = 100} 
   const userId = req.params._id
   const collectionName = "users";
   const collection = database.collection(collectionName);
-  
-  // Parse the query parameters
-  const from = req.query.from ? new Date(req.query.from) : new Date(0);
-  const to = req.query.to ? new Date(req.query.to) : new Date();
-  let limit = parseInt(req.query.limit);
-
-  // Check if limit is a number
-  if (isNaN(limit)) {
-    limit = Infinity; // Set a default value
+  const user = collection.aggregate([
+    {$match:{_id: new ObjectId(userId)}},
+    {
+       $project: {
+          username: 1,
+          _id: 1,
+          log: {
+            $filter: {
+              input: "$log",
+              as: "item",
+              cond: {
+                $and: [
+                  {$gte: ["$$item.date", new Date(params.from)]}, 
+                  {$lte: ["$$item.date", new Date(params.to)]}
+                ]
+              }
+            }
+       }
+      }
+    },
+    {$project: {
+      username: 1,
+      _id: 1,
+      count: { $cond: { if: { $isArray: "$log" }, then: { $size: "$log" }, else: "NA"} },
+      log: { $slice: ["$log", params.limit] }
+    }}
+  ])
+  for await (const doc of user) {
+    res.json({
+      "username": doc.username,
+      "count": doc.count,
+      "_id": doc._id,
+      "log": doc.log
+    })
   }
-
-  // Define the aggregation pipeline
-  const pipeline = [
-    { $match: { _id: new ObjectId(userId) } },
-    { $unwind: "$log" },
-    { $addFields: { "log.date": { $toDate: "$log.date" } } },
-    { $match: { "log.date": { $gte: from, $lte: to } } },
-    { $sort: { "log.date": -1 } }
-  ];
-
-  // Add the $limit stage if limit is a valid number
-  if (!isNaN(limit)) {
-    pipeline.push({ $limit: limit });
-  }
-
-  pipeline.push({
-    $group: {
-      _id: "$_id",
-      username: { $first: "$username" },
-      count: { $sum: 1 },
-      log: { $push: "$log" }
-    }
-  });
-
-  // Execute the aggregation pipeline
-  const user = await collection.aggregate(pipeline).toArray();
-
-  // Return the result
-  if (user.length > 0) {
-    res.json(user[0]);
-  } else {
-    res.json({ message: "No logs found for this user within the specified date range." });
-  }
-});
+})
 
 
 
