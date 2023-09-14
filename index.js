@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
-const { MongoClient } = require("mongodb");
+const { MongoClient, ReturnDocument } = require("mongodb");
 
 app.use(cors())
 app.use(express.static('public'))
@@ -25,7 +25,8 @@ app.route('/api/users')
 .post(async (req, res) => {
   const _username = req.body.username
   const user = {
-    username: _username
+    username: _username,
+    exercises: []
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -54,4 +55,31 @@ app.route('/api/users')
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
+})
+
+
+app.route('/api/users/:_id/exercises')
+.post(async (req, res) => {
+  const userId = req.body._id
+  const _exercise = {
+    "description" : req.body.description,
+    "duration" : req.body.duration,
+    "date" : req.body.date !== "" ? new Date(req.body.date).toDateString() : new Date().toDateString()
+  }
+  const collectionName = "users";
+  const collection = database.collection(collectionName);
+  const updateQuery = { $push: { exercises: _exercise } };
+    await collection.findOneAndUpdate({_id: userId},  updateQuery, {projection: {username: 1, _id: 1}, upsert: true}).then(
+      (data) =>{
+        res.json({
+          "username": data.username,
+          "_id": data._id,
+          "description": _exercise.description,
+          "duration": _exercise.duration,
+          "date": _exercise.date
+        })
+      }
+    , (error) => {
+      console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+    })
 })
