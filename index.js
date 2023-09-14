@@ -90,7 +90,7 @@ app.route('/api/users/:_id/logs')
   const collectionName = "users";
   const collection = database.collection(collectionName);
   const user = collection.aggregate([
-    {
+    {  $match:{_id: new ObjectId(userId)},
        $project: {
           username: 1,
           _id: 1,
