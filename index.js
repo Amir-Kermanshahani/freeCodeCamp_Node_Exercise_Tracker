@@ -87,6 +87,9 @@ app.route('/api/users/:_id/exercises')
 app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
   const params = req.query
+  if(!params.to) {params.to = new Date()}
+  if(!params.from) {params.from = new Date(0)}
+  if (!params.limit) {params.limit = 100} 
   const userId = req.params._id
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -102,7 +105,7 @@ app.route('/api/users/:_id/logs')
               input: "$date",
               as: "date",
               cond: {
-                $or: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
+                $and: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
               }
        }
     }}
