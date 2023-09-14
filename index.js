@@ -90,7 +90,8 @@ app.route('/api/users/:_id/logs')
   const collectionName = "users";
   const collection = database.collection(collectionName);
   const user = collection.aggregate([
-    {  $match:{_id: new ObjectId(userId)},
+    {$match:{_id: new ObjectId(userId)}},
+    {
        $project: {
           username: 1,
           _id: 1,
@@ -98,6 +99,7 @@ app.route('/api/users/:_id/logs')
           log: 1
        }
     }
+    
   ] )
   for await (const doc of user) {
     res.json({
