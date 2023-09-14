@@ -73,10 +73,10 @@ app.route('/api/users/:_id/exercises')
       (data) =>{
         res.json({
           "username": data.username,
-          "_id": data._id,
           "description": _exercise.description,
-          "duration": _exercise.duration,
-          "date": _exercise.date
+          "duration": Number(_exercise.duration),
+          "date": _exercise.date,
+          "_id": data._id
         })
       }
     , (error) => {
@@ -101,9 +101,9 @@ app.route('/api/users/:_id/logs')
   ] )
   for await (const doc of user) {
     res.json({
-      "_id": doc._id,
       "username": doc.username,
       "count": doc.count,
+      "_id": doc._id,
       "log": doc.log
     })
   }
