@@ -102,7 +102,7 @@ app.route('/api/users/:_id/logs')
               input: "$date",
               as: "date",
               cond: {
-                $and: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
+                $or: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
               }
        }
     }}
