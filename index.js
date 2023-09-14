@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
-const { MongoClient, ReturnDocument } = require("mongodb");
+const { MongoClient, ReturnDocument, ObjectId } = require("mongodb");
 
 app.use(cors())
 app.use(express.static('public'))
@@ -26,7 +26,7 @@ app.route('/api/users')
   const _username = req.body.username
   const user = {
     username: _username,
-    exercises: []
+    log: []
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -45,7 +45,7 @@ app.route('/api/users')
   const collectionName = "users";
   const collection = database.collection(collectionName);
   try {
-    const users = await collection.find({}).toArray();
+    const users = await collection.find({}, {projection: {log: 0}}).toArray();
     console.log("Listed all the users successfully.")
     res.json(users)
   } catch (err) {
@@ -60,7 +60,7 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 
 app.route('/api/users/:_id/exercises')
 .post(async (req, res) => {
-  const userId = req.body._id
+  const userId = req.params._id
   const _exercise = {
     "description" : req.body.description,
     "duration" : req.body.duration,
@@ -68,8 +68,8 @@ app.route('/api/users/:_id/exercises')
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
-  const updateQuery = { $push: { exercises: _exercise } };
-    await collection.findOneAndUpdate({_id: userId},  updateQuery, {projection: {username: 1, _id: 1}, upsert: true}).then(
+  const updateQuery = { $push: { log: _exercise } };
+    await collection.findOneAndUpdate({_id: new ObjectId(userId)},  updateQuery, {projection: {username:1}, upsert: true}).then(
       (data) =>{
         res.json({
           "username": data.username,
@@ -83,3 +83,32 @@ app.route('/api/users/:_id/exercises')
       console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
     })
 })
+
+app.route('/api/users/:_id/logs')
+.get(async (req, res) => {
+  const userId = req.params._id
+  const collectionName = "users";
+  const collection = database.collection(collectionName);
+  const user = collection.aggregate([
+    {
+       $project: {
+          username: 1,
+          _id: 1,
+          count: { $cond: { if: { $isArray: "$log" }, then: { $size: "$log" }, else: "NA"} },
+          log: 1
+       }
+    }
+  ] )
+  for await (const doc of user) {
+    res.json({
+      "_id": doc._id,
+      "username": doc.username,
+      "count": doc.count,
+      "log": doc.log
+    })
+  }
+})
+
+
+
+
