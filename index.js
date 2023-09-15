@@ -64,7 +64,7 @@ app.route('/api/users/:_id/exercises')
   const _exercise = {
     "description" : req.body.description,
     "duration" : Number(req.body.duration),
-    "date" : req.body.date !== "" ? new Date(req.body.date).toDateString() : new Date().toDateString()
+    "date" : req.body.date !== "" ? new Date(req.body.date) : new Date()
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -88,11 +88,11 @@ app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
 
   const params = req.query
-  let toDate = new Date().toDateString()
-  let fromDate = new Date(0).toDateString()
+  let toDate = new Date()
+  let fromDate = new Date(0)
   let logLimit = new Int32(100)
-  if (params.to) {toDate = new Date(params.to).toDateString()} 
-  if (params.from) {fromDate = new Date(params.from).toDateString()} 
+  if (params.to) {toDate = new Date(params.to)} 
+  if (params.from) {fromDate = new Date(params.from)} 
   if(params.limit) {logLimit = new Int32(params.limit)}
 
   const userId = req.params._id
@@ -108,21 +108,43 @@ app.route('/api/users/:_id/logs')
             cond: {$and: [
               {$gt: ['$$item.date', fromDate]},
               {$lt: ['$$item.date', toDate]}
-            ] },
+            ]},
             limit: Number(logLimit),
         }},
         username: 1,
     }},
-    {$set: {count: {$size: '$log'}}}
+    {$set: {count: {$size: '$log'}}},
+    {$addFields: {
+      "log": {
+        $map: {
+          input: "$log",
+          as: "item",
+          in: {
+            $mergeObjects: [
+              "$$item",
+              {
+                date: {
+                  $concat :[
+                    {$arrayElemAt: [['','Sun','Mon','Tue','Wed','Thu','Fri','Sat'], {'$dayOfWeek': '$$item.date'}]}, " ",
+                    {$arrayElemAt: [['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], {'$month': '$$item.date'}]}, " ",
+                    {$dateToString: { format: "%d %Y", date: "$$item.date"}} ,
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }}
 ])
-  for await (const doc of user) {
-    res.json({
-      "username": doc.username,
-      "count": doc.count,
-      "_id": doc._id,
-      "log": doc.log
-    })
+  let response = {}
+  for await(const result of user) {
+      response.username= result.username,
+      response.count= result.count,
+      response._id= result._id,
+      response.log= result.log
   }
+  res.json(response)
 })
 
 
