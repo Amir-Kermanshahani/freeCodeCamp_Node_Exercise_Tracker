@@ -139,12 +139,9 @@ app.route('/api/users/:_id/logs')
 ])
   let response = {}
   for await(const result of user) {
-      response.username= result.username,
-      response.count= result.count,
-      response._id= result._id,
-      response.log= result.log
+    res.json(result)
   }
-  res.json(response)
+  
 })
 
 
