@@ -2,7 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
-const { MongoClient, ReturnDocument, ObjectId } = require("mongodb");
+const { MongoClient, ReturnDocument, ObjectId, Int32 } = require("mongodb");
 
 app.use(cors())
 app.use(express.static('public'))
@@ -64,7 +64,7 @@ app.route('/api/users/:_id/exercises')
   const _exercise = {
     "description" : req.body.description,
     "duration" : Number(req.body.duration),
-    "date" : req.body.date !== "" ? new Date(req.body.date).toDateString() : new Date().toDateString()
+    "date" : req.body.date !== "" ? new Date(req.body.date) : new Date()
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -75,7 +75,7 @@ app.route('/api/users/:_id/exercises')
           "username": data.username,
           "description": _exercise.description,
           "duration": Number(_exercise.duration),
-          "date": _exercise.date,
+          "date": _exercise.date.toDateString(),
           "_id": data._id
         })
       }
@@ -84,89 +84,45 @@ app.route('/api/users/:_id/exercises')
     })
 })
 
-// app.route('/api/users/:_id/logs')
-// .get(async (req, res) => {
-//   const params = req.query
-//   if(!params.to) {params.to = new Date()}
-//   if(!params.from) {params.from = new Date(0)}
-//   if (!params.limit) {params.limit = 100} 
-//   const userId = req.params._id
-//   const collectionName = "users";
-//   const collection = database.collection(collectionName);
-//   const user = collection.aggregate([
-//     {$match:{_id: new ObjectId(userId)}},
-//     {
-//        $project: {
-//           username: 1,
-//           _id: 1,
-//           count: { $cond: { if: { $isArray: "$log" }, then: { $size: "$log" }, else: "NA"} },
-//           log: {
-//             $filter: {
-//               input: "$date",
-//               as: "date",
-//               cond: {
-//                 $and: [{$gt: ["$date", new Date(params.from)]}, {$lt: ["$date", new Date(params.to)]}, {$slice: ["$log", params.limit]}]
-//               }
-//        }
-//     }}
-//   }
-//   ])
-//   for await (const doc of user) {
-//     res.json({
-//       "username": doc.username,
-//       "count": doc.count,
-//       "_id": doc._id,
-//       "log": doc.log
-//     })
-//   }
-// })
-
-
 app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
+
   const params = req.query
-  if(!params.to) {params.to = new Date()}
-  if(!params.from) {params.from = new Date(0)}
-  if (!params.limit) {params.limit = 100} 
+  let toDate = new Date()
+  let fromDate = new Date(0)
+  if (params.to) {toDate = new Date(params.to)} 
+  if (params.from) {fromDate = new Date(params.from)} 
+  console.log(toDate, fromDate)
+  if (!params.limit) {params.limit = Infinity} 
+
   const userId = req.params._id
   const collectionName = "users";
   const collection = database.collection(collectionName);
+
   const user = collection.aggregate([
-    {$match:{_id: new ObjectId(userId)}},
-    {
-       $project: {
-          username: 1,
-          _id: 1,
-          log: {
-            $filter: {
-              input: "$log",
-              as: "item",
-              cond: {
-                $and: [
-                  {$gte: ["$$item.date", new Date(params.from)]}, 
-                  {$lte: ["$$item.date", new Date(params.to)]}
-                ]
-              }
-            }
-       }
-      }
-    },
-    {$project: {
-      username: 1,
-      _id: 1,
-      count: { $cond: { if: { $isArray: "$log" }, then: { $size: "$log" }, else: "NA"} },
-      log: { $slice: ["$log", params.limit] }
+    { $match: {_id: new ObjectId(userId)}},
+    { $project: {
+        log: {$filter: {
+            input: '$log',
+            as: 'item',
+            cond: {$and: [
+              {$gt: ['$$item.date', fromDate]},
+              {$lt: ['$$item.date', toDate]}
+            ] },
+            limit: Number(params.limit)
+        }},
+        username: 1,
+        count: {$size: '$log'},
     }}
-  ])
+])
+
   for await (const doc of user) {
-    res.json({
-      "username": doc.username,
-      "count": doc.count,
-      "_id": doc._id,
-      "log": doc.log
-    })
+    console.log(doc)
   }
 })
+
+
+
 
 
 
