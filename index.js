@@ -34,8 +34,8 @@ app.route('/api/users')
     const insertResult = await collection.insertOne(user);
     console.log('documents successfully inserted.\n');
     res.json({
-      "username": user.username,
-      "_id": insertResult.insertedId
+      username: user.username,
+      _id: insertResult.insertedId
     })
   } catch (err) {
     console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
@@ -62,9 +62,9 @@ app.route('/api/users/:_id/exercises')
 .post(async (req, res) => {
   const userId = req.params._id
   const _exercise = {
-    "description" : req.body.description,
-    "duration" : Number(req.body.duration),
-    "date" : req.body.date !== "" ? new Date(req.body.date) : new Date()
+    description : req.body.description,
+    duration : Number(req.body.duration),
+    date : req.body.date !== "" ? new Date(req.body.date) : new Date()
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -72,11 +72,11 @@ app.route('/api/users/:_id/exercises')
     await collection.findOneAndUpdate({_id: new ObjectId(userId)},  updateQuery, {projection: {username:1}, upsert: true}).then(
       (data) =>{
         res.json({
-          "username": data.username,
-          "description": _exercise.description,
-          "duration": Number(_exercise.duration),
-          "date": _exercise.date.toDateString(),
-          "_id": data._id
+          username: data.username,
+          description: _exercise.description,
+          duration: Number(_exercise.duration),
+          date: _exercise.date.toDateString(),
+          _id: data._id
         })
       }
     , (error) => {
