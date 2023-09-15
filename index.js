@@ -93,7 +93,6 @@ app.route('/api/users/:_id/logs')
   if (params.to) {toDate = new Date(params.to)} 
   if (params.from) {fromDate = new Date(params.from)} 
   console.log(toDate, fromDate)
-  if (!params.limit) {params.limit = Infinity} 
 
   const userId = req.params._id
   const collectionName = "users";
