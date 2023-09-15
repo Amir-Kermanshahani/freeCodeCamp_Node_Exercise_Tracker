@@ -90,8 +90,10 @@ app.route('/api/users/:_id/logs')
   const params = req.query
   let toDate = new Date()
   let fromDate = new Date(0)
+  let logLimit = 1000
   if (params.to) {toDate = new Date(params.to)} 
   if (params.from) {fromDate = new Date(params.from)} 
+  if(params.limit) {logLimit = Number(params.limit)}
   console.log(toDate, fromDate)
 
   const userId = req.params._id
