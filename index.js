@@ -109,11 +109,12 @@ app.route('/api/users/:_id/logs')
               {$gt: ['$$item.date', fromDate]},
               {$lt: ['$$item.date', toDate]}
             ] },
-            limit: Number(logLimit)
+            limit: Number(logLimit),
         }},
         username: 1,
-        count: {$size: '$log'},
-    }}
+        
+    }},
+    {$set: {count: {$size: '$log'}}}
 ])
   for await (const doc of user) {
     res.json(doc)
