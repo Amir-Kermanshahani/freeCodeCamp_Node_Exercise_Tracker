@@ -115,11 +115,9 @@ app.route('/api/users/:_id/logs')
         count: {$size: '$log'},
     }}
 ])
-  let result = []
   for await (const doc of user) {
-    result.push(doc)
+    res.json(doc)
   }
-  res.json(result)
 })
 
 
