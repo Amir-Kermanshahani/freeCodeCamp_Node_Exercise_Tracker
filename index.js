@@ -90,11 +90,10 @@ app.route('/api/users/:_id/logs')
   const params = req.query
   let toDate = new Date()
   let fromDate = new Date(0)
-  let logLimit = 1000
+  let logLimit = new Int32(100)
   if (params.to) {toDate = new Date(params.to)} 
   if (params.from) {fromDate = new Date(params.from)} 
-  if(params.limit) {logLimit = Number(params.limit)}
-  console.log(toDate, fromDate)
+  if(params.limit) {logLimit = new Int32(params.limit)}
 
   const userId = req.params._id
   const collectionName = "users";
@@ -110,16 +109,17 @@ app.route('/api/users/:_id/logs')
               {$gt: ['$$item.date', fromDate]},
               {$lt: ['$$item.date', toDate]}
             ] },
-            limit: Number(params.limit)
+            limit: Number(logLimit)
         }},
         username: 1,
         count: {$size: '$log'},
     }}
 ])
-
+  let result = []
   for await (const doc of user) {
-    console.log(doc)
+    result.push(doc)
   }
+  res.json(result)
 })
 
 
