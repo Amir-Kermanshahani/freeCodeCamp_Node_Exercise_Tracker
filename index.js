@@ -64,7 +64,7 @@ app.route('/api/users/:_id/exercises')
   const _exercise = {
     "description" : req.body.description,
     "duration" : Number(req.body.duration),
-    "date" : req.body.date !== "" ? new Date(req.body.date) : new Date()
+    "date" : req.body.date !== "" ? new Date(req.body.date).toDateString() : new Date().toDateString()
   }
   const collectionName = "users";
   const collection = database.collection(collectionName);
@@ -75,7 +75,7 @@ app.route('/api/users/:_id/exercises')
           "username": data.username,
           "description": _exercise.description,
           "duration": Number(_exercise.duration),
-          "date": _exercise.date.toDateString(),
+          "date": _exercise.date,
           "_id": data._id
         })
       }
@@ -88,11 +88,11 @@ app.route('/api/users/:_id/logs')
 .get(async (req, res) => {
 
   const params = req.query
-  let toDate = new Date()
-  let fromDate = new Date(0)
+  let toDate = new Date().toDateString()
+  let fromDate = new Date(0).toDateString()
   let logLimit = new Int32(100)
-  if (params.to) {toDate = new Date(params.to)} 
-  if (params.from) {fromDate = new Date(params.from)} 
+  if (params.to) {toDate = new Date(params.to).toDateString()} 
+  if (params.from) {fromDate = new Date(params.from).toDateString()} 
   if(params.limit) {logLimit = new Int32(params.limit)}
 
   const userId = req.params._id
@@ -112,12 +112,16 @@ app.route('/api/users/:_id/logs')
             limit: Number(logLimit),
         }},
         username: 1,
-        
     }},
     {$set: {count: {$size: '$log'}}}
 ])
   for await (const doc of user) {
-    res.json(doc)
+    res.json({
+      "username": doc.username,
+      "count": doc.count,
+      "_id": doc._id,
+      "log": doc.log
+    })
   }
 })
 
