@@ -75,7 +75,7 @@ app.route('/api/users/:_id/exercises')
           "username": data.username,
           "description": _exercise.description,
           "duration": Number(_exercise.duration),
-          "date": _exercise.date,
+          "date": _exercise.date.toDateString(),
           "_id": data._id
         })
       }
@@ -112,8 +112,8 @@ app.route('/api/users/:_id/logs')
             limit: Number(logLimit),
         }},
         username: 1,
+        count: {$size: '$log'}
     }},
-    {$set: {count: {$size: '$log'}}},
     {$addFields: {
       "log": {
         $map: {
