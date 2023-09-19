@@ -101,7 +101,6 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
   const params = req.query;
   let toDate = new Date();
   let fromDate = new Date(0);
-  let logLimit = 100;
   if (params.to) {
     toDate = new Date(params.to);
   }
@@ -109,7 +108,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
     fromDate = new Date(params.from);
   }
   if (params.limit) {
-    logLimit = new Int32(params.limit);
+    logLimit = params.limit;
   }
 
   const userId = req.params._id;
@@ -130,16 +129,32 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
                 { $lt: ["$$item._date", toDate] },
               ],
             },
-            limit: logLimit,
+            if(logLimit) {limit: logLimit},
           },
         },
-        count: { $size: "$log" },
         username: 1,
+        count: {
+          $size: {
+            $filter: {
+              input: "$log",
+              as: "item",
+              cond: {
+                $and: [
+                  { $gt: ["$$item._date", fromDate] },
+                  { $lt: ["$$item._date", toDate] },
+                ],
+              },
+              if(logLimit) {limit: logLimit},
+            }
+          }
+        }
       },
+      
     },
     {
       $project: {
         "log._date": 0,
+        
       },
     },
   ]);
