@@ -130,7 +130,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
                 { $lt: ["$$item._date", toDate] },
               ],
             },
-            if(logLimit) {limit: logLimit},
+            limit: logLimit,
           },
         },
         username: 1,
@@ -145,7 +145,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
                   { $lt: ["$$item._date", toDate] },
                 ],
               },
-              if(logLimit) {limit: logLimit},
+              limit: logLimit,
             }
           }
         }
