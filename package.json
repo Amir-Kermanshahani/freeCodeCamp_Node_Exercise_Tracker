@@ -4,13 +4,15 @@
 	"description": "A REST API project, part of Free Code Camp's curriculum",
 	"main": "index.js",
 	"scripts": {
-		"start": "nodemon index.js"
+		"start": "nodemon index1.js"
 	},
 	"dependencies": {
+		"body-parser": "^1.20.2",
 		"cors": "^2.8.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.16.4",
 		"mongodb": "^6.0.0",
+		"mongoose": "^7.5.2",
 		"nodemon": "^3.0.1"
 	},
 	"repository": {
