@@ -62,7 +62,7 @@ app.route('/api/users/:_id/exercises')
 .post(async (req, res) => {
   const userId = req.params._id
   const _exercise = {
-    description : req.body.description,
+    description : String(req.body.description),
     duration : Number(req.body.duration),
     _date : req.body.date !== "" ? new Date(req.body.date) : new Date(),
   }
@@ -115,6 +115,7 @@ app.route('/api/users/:_id/logs')
         }
       },
       count: {$size: '$log'},
+      username: 1
     }}
     ,
     { $project: {
@@ -122,10 +123,14 @@ app.route('/api/users/:_id/logs')
     }
   },
 ])
+
+finalResult = {}
+
   for await(const result of user) {
-    res.json(result)
+    finalResult = (result)
   }
   
+  res.json(finalResult)
 })
 
 
