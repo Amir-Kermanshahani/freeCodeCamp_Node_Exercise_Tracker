@@ -101,7 +101,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
   const params = req.query;
   let toDate = new Date();
   let fromDate = new Date(0);
-  let logLimit = new Int32(100);
+  let logLimit = 100;
   if (params.to) {
     toDate = new Date(params.to);
   }
@@ -130,7 +130,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
                 { $lt: ["$$item._date", toDate] },
               ],
             },
-            limit: Number(logLimit),
+            limit: logLimit,
           },
         },
         count: { $size: "$log" },
