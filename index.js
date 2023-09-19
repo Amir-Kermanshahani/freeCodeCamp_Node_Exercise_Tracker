@@ -116,7 +116,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
   const collectionName = "users";
   const collection = database.collection(collectionName);
 
-  const user = collection.aggregate([
+  const user = await collection.aggregate([
     { $match: { _id: new ObjectId(userId) } },
     {
       $project: {
