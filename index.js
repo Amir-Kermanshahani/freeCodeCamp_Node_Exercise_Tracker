@@ -102,46 +102,25 @@ app.route('/api/users/:_id/logs')
 
   const user = collection.aggregate([
     { $match: {_id: new ObjectId(userId)}},
+    {$project: {
+      log: {
+        $filter: {
+          input: '$log',
+          as: 'item',
+          cond: {$and: [
+            {$gt: ['$$item._date', fromDate]},
+            {$lt: ['$$item._date', toDate]}
+          ]},
+          limit: Number(logLimit),
+        }
+      },
+      count: {$size: '$log'},
+    }}
+    ,
     { $project: {
-      "log._date": 0
+      "log._date": 0,
     }
-    //   {
-    //     log: {$filter: {
-    //         input: '$log',
-    //         as: 'item',
-    //         cond: {$and: [
-    //           {$gt: ['$$item.date', fromDate]},
-    //           {$lt: ['$$item.date', toDate]}
-    //         ]},
-    //         limit: Number(logLimit),
-    //     }},
-    //     // username: 1,
-    //     count: {$size: '$log'},
-    //     // dateString: 1
-    // }
   },
-    // {$addFields: {
-    //   "log": {
-    //     $map: {
-    //       input: "$log",
-    //       as: "item",
-    //       in: {
-    //         $mergeObjects: [
-    //           "$$item",
-    //           {
-    //             date: {
-    //               $concat :[
-    //                 {$arrayElemAt: [['','Sun','Mon','Tue','Wed','Thu','Fri','Sat'], {'$dayOfWeek': '$$item.date'}]}, " ",
-    //                 {$arrayElemAt: [['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], {'$month': '$$item.date'}]}, " ",
-    //                 {$dateToString: { format: "%d %Y", date: "$$item.date"}} ,
-    //               ]
-    //             }
-    //           }
-    //         ]
-    //       }
-    //     }
-    //   }
-    // }}
 ])
   for await(const result of user) {
     res.json(result)
