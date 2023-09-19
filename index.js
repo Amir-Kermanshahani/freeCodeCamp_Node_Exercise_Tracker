@@ -101,6 +101,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
   const params = req.query;
   let toDate = new Date();
   let fromDate = new Date(0);
+  let logLimit = null; 
   if (params.to) {
     toDate = new Date(params.to);
   }
@@ -108,7 +109,7 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
     fromDate = new Date(params.from);
   }
   if (params.limit) {
-    logLimit = params.limit;
+    logLimit = parseInt(params.limit);
   }
 
   const userId = req.params._id;
@@ -163,5 +164,6 @@ app.route("/api/users/:_id/logs").get(async (req, res) => {
   for await (const result of user) {
     finalResult = result;
   }
+  console.log("Filtered logs:", finalResult);
   res.json(finalResult);
 });
