@@ -64,8 +64,9 @@ app.route('/api/users/:_id/exercises')
   const _exercise = {
     description : req.body.description,
     duration : Number(req.body.duration),
-    date : req.body.date !== "" ? new Date(req.body.date) : new Date()
+    _date : req.body.date !== "" ? new Date(req.body.date) : new Date(),
   }
+  _exercise.date = _exercise._date.toDateString()
   const collectionName = "users";
   const collection = database.collection(collectionName);
   const updateQuery = { $push: { log: _exercise } };
@@ -75,7 +76,7 @@ app.route('/api/users/:_id/exercises')
           username: data.username,
           description: _exercise.description,
           duration: Number(_exercise.duration),
-          date: _exercise.date.toDateString(),
+          date: _exercise.date,
           _id: data._id
         })
       }
@@ -102,42 +103,46 @@ app.route('/api/users/:_id/logs')
   const user = collection.aggregate([
     { $match: {_id: new ObjectId(userId)}},
     { $project: {
-        log: {$filter: {
-            input: '$log',
-            as: 'item',
-            cond: {$and: [
-              {$gt: ['$$item.date', fromDate]},
-              {$lt: ['$$item.date', toDate]}
-            ]},
-            limit: Number(logLimit),
-        }},
-        username: 1,
-        count: {$size: '$log'}
-    }},
-    {$addFields: {
-      "log": {
-        $map: {
-          input: "$log",
-          as: "item",
-          in: {
-            $mergeObjects: [
-              "$$item",
-              {
-                date: {
-                  $concat :[
-                    {$arrayElemAt: [['','Sun','Mon','Tue','Wed','Thu','Fri','Sat'], {'$dayOfWeek': '$$item.date'}]}, " ",
-                    {$arrayElemAt: [['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], {'$month': '$$item.date'}]}, " ",
-                    {$dateToString: { format: "%d %Y", date: "$$item.date"}} ,
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      }
-    }}
+      "log._date": 0
+    }
+    //   {
+    //     log: {$filter: {
+    //         input: '$log',
+    //         as: 'item',
+    //         cond: {$and: [
+    //           {$gt: ['$$item.date', fromDate]},
+    //           {$lt: ['$$item.date', toDate]}
+    //         ]},
+    //         limit: Number(logLimit),
+    //     }},
+    //     // username: 1,
+    //     count: {$size: '$log'},
+    //     // dateString: 1
+    // }
+  },
+    // {$addFields: {
+    //   "log": {
+    //     $map: {
+    //       input: "$log",
+    //       as: "item",
+    //       in: {
+    //         $mergeObjects: [
+    //           "$$item",
+    //           {
+    //             date: {
+    //               $concat :[
+    //                 {$arrayElemAt: [['','Sun','Mon','Tue','Wed','Thu','Fri','Sat'], {'$dayOfWeek': '$$item.date'}]}, " ",
+    //                 {$arrayElemAt: [['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], {'$month': '$$item.date'}]}, " ",
+    //                 {$dateToString: { format: "%d %Y", date: "$$item.date"}} ,
+    //               ]
+    //             }
+    //           }
+    //         ]
+    //       }
+    //     }
+    //   }
+    // }}
 ])
-  let response = {}
   for await(const result of user) {
     res.json(result)
   }
