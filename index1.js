@@ -82,9 +82,9 @@ app.post('/api/users/:_id/exercises', (req,res) => {
   };
   var options = {new: true};
   
-  User.findOneAndUpdate (filter, update, options).then(
+  User.findOneAndUpdate(filter, update, options).then(
     (data) => {
-    data.log.push(update);
+        data.log.push(update);
       console.log('saving the date ' + typeof(update.date) + ' to the db')
       data.save();
       //response object with correct parameters
@@ -109,14 +109,16 @@ app.get('/api/users/:_id/logs', (req,res) => {
   var from = req.query.from;
   var to = req.query.to
   if (limit) {
-    User.findById(id, {log: {$slice: -limit}}, (err,data) => {
-      res.json({
-        _id: id,
-        username: data.username,
-        count: data.log.length,
-        log: data.log
-      })
-    })
+    User.findById(id, {log: {$slice: -limit}}).then(
+        (data)=> {
+            res.json({
+                _id: id,
+                username: data.username,
+                count: data.log.length,
+                log: data.log
+              })
+        }
+    )
   } else if (to) {
     User.findById(id).then(
     (data) => {
