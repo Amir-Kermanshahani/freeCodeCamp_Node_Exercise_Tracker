@@ -17,7 +17,8 @@
 		"uuidv4": "^6.2.13"
 	},
 	"repository": {
-		"url": "https://github.com/Amir-Kermanshahani/freeCodeCamp_Node_Exercise_Tracker",
+		"url": "https://github.com/Amir-Kermanshahani/freeCodeCamp_Node_Exercise_Tracker"
+	},
 	"license": "MIT",
 	"keywords": [
 		"node",
