@@ -4,7 +4,7 @@
 	"description": "A REST API project, part of Free Code Camp's curriculum",
 	"main": "index.js",
 	"scripts": {
-		"start": "nodemon index1.js"
+		"start": "nodemon index2.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.20.2",
@@ -13,7 +13,8 @@
 		"express": "^4.16.4",
 		"mongodb": "^6.0.0",
 		"mongoose": "^7.5.2",
-		"nodemon": "^3.0.1"
+		"nodemon": "^3.0.1",
+		"uuidv4": "^6.2.13"
 	},
 	"repository": {
 		"url": "https://github.com/freeCodeCamp/boilerplate-project-exercisetracker"
