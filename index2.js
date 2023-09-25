@@ -110,7 +110,9 @@ app.route("/api/users/:_id/exercises")
   });
 
 app.route("/api/users/:_id/logs")
-  .get((req, res) => {
+  .get(async (req, res) => {
+    const delay = ms =>  new Promise((resolve) => setTimeout(resolve,ms));
+    await delay(10);
     const { to, from, limit } = req.query;
     const userId = req.params._id;
 
@@ -137,7 +139,7 @@ app.route("/api/users/:_id/logs")
         user.log = user.log.slice(0, parseInt(limit));
       }
 
-
+      
       const response = {
         _id: user._id,
         username: user.username,
