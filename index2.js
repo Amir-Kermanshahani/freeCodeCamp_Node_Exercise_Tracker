@@ -110,7 +110,7 @@ app.route("/api/users/:_id/exercises")
   });
 
 app.route("/api/users/:_id/logs")
-  .get(async (req, res) => {
+  .get((req, res) => {
     const { to, from, limit } = req.query;
     const userId = req.params._id;
 
