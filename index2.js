@@ -29,7 +29,7 @@ app.route("/api/users")
       const dbData = JSON.parse(fs.readFileSync(dbPath));
       const newUser = {
         _id:  uuid(), // Generate a unique ID for the user
-        username,
+        username: username,
         log: [],
       };
       dbData.users.push(newUser);
@@ -100,7 +100,7 @@ app.route("/api/users/:_id/exercises")
         username: user.username,
         _id: user._id,
         description: exercise.description,
-        duration: Number(exercise.duration),
+        duration: exercise.duration,
         date: exercise.date.toDateString(),
       });
     } catch (err) {
@@ -111,14 +111,12 @@ app.route("/api/users/:_id/exercises")
 
 app.route("/api/users/:_id/logs")
   .get(async (req, res) => {
-    const delay = ms =>  new Promise((resolve) => setTimeout(resolve,ms));
-    await delay(10);
     const { to, from, limit } = req.query;
     const userId = req.params._id;
 
     try {
       const dbData = JSON.parse(fs.readFileSync(dbPath));
-      const user = dbData.users.find((u) => u._id === userId);
+      const user = await dbData.users.find((u) => u._id === userId);
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -144,7 +142,7 @@ app.route("/api/users/:_id/logs")
         _id: user._id,
         username: user.username,
         count: user.log.length,
-        log: user.log.map((exercise) => 
+        log: await user.log.map((exercise) => 
             {
             return {
                 description : exercise.description,
