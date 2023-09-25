@@ -111,46 +111,33 @@ app.route("/api/users/:_id/exercises")
 
 app.route("/api/users/:_id/logs")
   .get(async (req, res) => {
-    const { to, from, limit } = req.query;
+
+    req.query.to ? toDate = new Date(req.query.to) : toDate = new Date();
+    console.log(toDate)
+    req.query.from ? fromDate = new Date(req.query.from) : fromDate = new Date(0);
+    console.log(fromDate)
+    req.query.limit ? limitUsers = req.query.limit : limitUsers = Infinity
+    console.log(limitUsers)
+
     const userId = req.params._id;
 
     try {
       const dbData = JSON.parse(fs.readFileSync(dbPath));
-      const user = await dbData.users.find((u) => u._id === userId);
+      let user = dbData.users.find((u) => u._id === userId);
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-
-      let fromDate = new Date(0);
-      let toDate = new Date();
-
-      if (from) {
-        fromDate = new Date(from);
-      }
-
-      if (to) {
-        toDate = new Date(to);
-      }
       
-      if (limit) {
-        user.log = user.log.slice(0, parseInt(limit));
-      }
-
-      
+      user.log = user.log.slice(0, limitUsers)
+      user.log.forEach(element => {
+        element.date = new Date(element.date).toDateString()
+      });
       const response = {
         _id: user._id,
         username: user.username,
         count: user.log.length,
-        log: await user.log.map((exercise) => 
-            {
-            return {
-                description : exercise.description,
-                duration : exercise.duration,
-                date :  new Date(exercise.date).toDateString()
-            }
-            }
-        )
+        log: user.log
       };
 
       console.log("Filtered logs:", response);

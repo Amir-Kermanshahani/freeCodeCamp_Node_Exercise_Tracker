@@ -4,7 +4,7 @@
 	"description": "A REST API project, part of Free Code Camp's curriculum",
 	"main": "index.js",
 	"scripts": {
-		"start": "node index2.js"
+		"start": "nodemon index2.js"
 	},
 	"dependencies": {
 		"body-parser": "^1.20.2",
