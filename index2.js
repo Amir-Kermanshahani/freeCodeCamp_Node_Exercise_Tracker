@@ -145,9 +145,9 @@ app.route("/api/users/:_id/logs")
         log: user.log.map((exercise) => 
             {
             return {
-                "description" : exercise.description,
-                "duration" : exercise.duration,
-                "date" :  new Date(exercise.date).toDateString()
+                description : exercise.description,
+                duration : exercise.duration,
+                date :  new Date(exercise.date).toDateString()
             }
             }
         )
