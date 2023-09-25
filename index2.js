@@ -98,10 +98,10 @@ app.route("/api/users/:_id/exercises")
       console.log("Exercise successfully added.");
       res.json({
         username: user.username,
+        _id: user._id,
         description: exercise.description,
         duration: Number(exercise.duration),
-        date: exercise.date,
-        _id: user._id,
+        date: exercise.date.toDateString(),
       });
     } catch (err) {
       console.error(`Error adding exercise: ${err}`);
@@ -132,19 +132,25 @@ app.route("/api/users/:_id/logs")
       if (to) {
         toDate = new Date(to);
       }
-
-      user.log = user.log.filter((exercise) => exercise.date > fromDate )
-      user.log = user.log.filter((exercise) => exercise.date < toDate )
-
+      
       if (limit) {
         user.log = user.log.slice(0, parseInt(limit));
       }
+
 
       const response = {
         _id: user._id,
         username: user.username,
         count: user.log.length,
-        log: user.log
+        log: user.log.map((exercise) => 
+            {
+            return {
+                "description" : exercise.description,
+                "duration" : exercise.duration,
+                "date" :  new Date(exercise.date).toDateString()
+            }
+            }
+        )
       };
 
       console.log("Filtered logs:", response);
